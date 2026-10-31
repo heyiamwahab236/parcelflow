@@ -1,0 +1,25 @@
+{
+  "name": "parcelflow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Parcel tracking application and AWS EKS deployment platform",
+  "workspaces": [
+    "apps/api",
+    "apps/web"
+  ],
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "test": "npm test --workspace apps/api",
+    "test:integration": "npm run test:integration --workspace apps/api",
+    "build": "npm run build --workspace apps/web",
+    "dev:web": "npm run dev --workspace apps/web",
+    "dev:api": "npm run dev --workspace apps/api",
+    "migrate": "npm run migrate --workspace apps/api",
+    "seed": "npm run seed --workspace apps/api"
+  },
+  "devDependencies": {
+    "prettier": "3.9.10"
+  }
+}

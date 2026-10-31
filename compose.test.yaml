@@ -1,0 +1,15 @@
+name: parcelflow-test
+services:
+  db:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: parcelflow_test
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test_only_password
+    ports: ['127.0.0.1:54330:5432']
+    tmpfs: [/var/lib/postgresql/data]
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U test -d parcelflow_test']
+      interval: 2s
+      timeout: 3s
+      retries: 30

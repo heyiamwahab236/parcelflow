@@ -1,0 +1,5 @@
+bucket       = "YOUR-UNIQUE-PARCELFLOW-STATE-BUCKET"
+key          = "parcelflow/dev/terraform.tfstate"
+region       = "eu-central-1"
+encrypt      = true
+use_lockfile = true

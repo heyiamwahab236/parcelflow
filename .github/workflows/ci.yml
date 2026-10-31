@@ -1,0 +1,95 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  application:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:17-bookworm
+        env:
+          POSTGRES_DB: parcelflow_test
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test_only_password
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U test -d parcelflow_test"
+          --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgresql://test:test_only_password@127.0.0.1:5432/parcelflow_test
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with: { persist-credentials: false }
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with: { node-version: '24', cache: npm }
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npm run test:integration
+      - run: npm run build
+      - run: npm audit --omit=dev --audit-level=high
+  infrastructure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with: { persist-credentials: false }
+      - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
+        with: { terraform_version: '1.17.1' }
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with: { python-version: '3.12' }
+      - run: pip install checkov==3.4.0 PyYAML==6.0.3
+      - run: terraform fmt -check -recursive infra
+      - run: terraform -chdir=infra/environments/dev init -backend=false -input=false -lockfile=readonly
+      - run: terraform -chdir=infra/environments/dev validate
+      - run: terraform -chdir=infra/environments/dev test
+      - run: terraform -chdir=infra/bootstrap init -backend=false -input=false -lockfile=readonly
+      - run: terraform -chdir=infra/bootstrap validate
+      - run: checkov --directory infra --config-file .checkov.yaml
+      - run: python scripts/check-manifests.py
+  containers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with: { persist-credentials: false }
+      - name: Build and start the complete application
+        run: docker compose up --build -d --wait --wait-timeout 120
+      - name: Exercise the application through Nginx and PostgreSQL
+        env:
+          ADMIN_TOKEN: local-demo-operator-token-change-before-use
+        run: python3 scripts/smoke.py
+      - name: Scan API image
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
+        with:
+          version: v0.76.1
+          image-ref: parcelflow-api:latest
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+      - name: Scan web image
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
+        with:
+          version: v0.76.1
+          image-ref: parcelflow-web:latest
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: '1'
+      - name: Scan source for accidentally committed secrets
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
+        with:
+          version: v0.76.1
+          scan-type: fs
+          scanners: secret
+          exit-code: '1'
+      - name: Collect logs on failure
+        if: failure()
+        run: docker compose logs --no-color --tail=100
+      - name: Stop disposable CI containers
+        if: always()
+        run: docker compose down -v

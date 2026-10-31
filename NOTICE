@@ -1,0 +1,8 @@
+The AWS Load Balancer Controller IAM policy in
+infra/policies/aws-load-balancer-controller.json is sourced without changes from
+https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/v3.6.2/docs/install/iam_policy.json
+AWS Load Balancer Controller is distributed under the Apache License 2.0.
+See infra/policies/LICENSE-Apache-2.0.txt.
+
+Application dependencies retain their respective licenses. This repository's
+MIT license applies to the original ParcelFlow code and documentation.

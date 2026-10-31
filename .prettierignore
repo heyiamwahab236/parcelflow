@@ -1,0 +1,7 @@
+node_modules
+**/dist
+**/.terraform
+infra/policies
+package-lock.json
+work
+docs/preview.jpg

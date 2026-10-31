@@ -1,0 +1,10 @@
+region                   = "eu-central-1"
+name                     = "parcelflow-dev"
+admin_role_arn           = "arn:aws:iam::123456789012:role/YourOperatorRole"
+github_repository        = "heyiamwahab236/parcelflow"
+github_oidc_provider_arn = "arn:aws:iam::123456789012:oidc-provider/token.actions.githubusercontent.com"
+# Empty means private EKS API. Use a VPC-connected runner/operator.
+# To work from a fixed public IP, add ONLY that IP as a /32.
+operator_cidrs       = []
+kubernetes_version  = "1.35"
+multi_az_database   = false

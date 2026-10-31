@@ -99,4 +99,3 @@ jobs:
         run: bash scripts/deploy.sh
       - name: Check public endpoint after DNS is configured
         run: curl --fail --silent --show-error --retry 5 --retry-delay 10 "https://$APP_HOSTNAME/healthz"
-

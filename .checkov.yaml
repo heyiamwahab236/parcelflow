@@ -1,0 +1,17 @@
+# Explicit baseline gate. This is not a claim of passing every Checkov policy.
+framework: terraform
+check:
+  - CKV_AWS_16
+  - CKV_AWS_17
+  - CKV_AWS_21
+  - CKV_AWS_41
+  - CKV_AWS_79
+  - CKV_AWS_111
+  - CKV_AWS_136
+  - CKV_AWS_149
+  - CKV_AWS_157
+  - CKV_AWS_158
+  - CKV_AWS_161
+  - CKV_AWS_163
+  - CKV_AWS_164
+quiet: true
