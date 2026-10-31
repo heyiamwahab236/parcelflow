@@ -1,11 +1,11 @@
-FROM node:24-bookworm-slim AS dependencies
+FROM node:25-bookworm-slim AS dependencies
 WORKDIR /app
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/package.json
 COPY apps/web/package.json apps/web/package.json
 RUN npm ci --workspace @parcelflow/api --omit=dev --ignore-scripts && npm cache clean --force
 
-FROM node:24-bookworm-slim
+FROM node:25-bookworm-slim
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl \
     && mkdir -p /app/certs \
     && curl --fail --silent --show-error https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -o /app/certs/rds.pem \
