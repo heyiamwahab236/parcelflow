@@ -13,10 +13,22 @@ resource "aws_eks_pod_identity_association" "observability" {
   service_account = each.key
   role_arn        = aws_iam_role.observability.arn
 }
+resource "aws_kms_key" "logs" {
+  description             = "${var.name} application log encryption"
+  enable_key_rotation     = true
+  deletion_window_in_days = 30
+  policy = jsonencode({ Version = "2012-10-17", Statement = [
+    { Sid = "AccountKeyAdministration", Effect = "Allow", Principal = { AWS = "${local.arn}:iam::${data.aws_caller_identity.current.account_id}:root" }, Action = "kms:*", Resource = "*" },
+    { Sid       = "EncryptContainerLogs", Effect = "Allow", Principal = { Service = "logs.${var.region}.amazonaws.com" }, Action = ["kms:Encrypt", "kms:Decrypt", "kms:ReEncrypt*", "kms:GenerateDataKey*", "kms:DescribeKey"], Resource = "*",
+      Condition = { ArnLike = { "kms:EncryptionContext:aws:logs:arn" = "${local.arn}:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/containerinsights/${var.name}/*" } }
+    }
+  ] })
+}
 resource "aws_cloudwatch_log_group" "containers" {
   for_each          = toset(["application", "host", "dataplane", "performance"])
   name              = "/aws/containerinsights/${var.name}/${each.key}"
   retention_in_days = 14
+  kms_key_id        = aws_kms_key.logs.arn
 }
 data "aws_eks_addon_version" "observability" {
   addon_name         = "amazon-cloudwatch-observability"

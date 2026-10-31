@@ -5,11 +5,19 @@ variable "deploy_role_arn" { type = string }
 variable "kubernetes_version" { type = string }
 variable "operator_cidrs" { type = list(string) }
 data "aws_partition" "current" {}
+data "aws_region" "current" {}
+data "aws_caller_identity" "current" {}
 locals { arn = "arn:${data.aws_partition.current.partition}" }
 resource "aws_kms_key" "cluster" {
   description             = "${var.name} EKS encryption"
   enable_key_rotation     = true
   deletion_window_in_days = 30
+  policy = jsonencode({ Version = "2012-10-17", Statement = [
+    { Sid = "AccountKeyAdministration", Effect = "Allow", Principal = { AWS = "${local.arn}:iam::${data.aws_caller_identity.current.account_id}:root" }, Action = "kms:*", Resource = "*" },
+    { Sid       = "EncryptClusterLogs", Effect = "Allow", Principal = { Service = "logs.${data.aws_region.current.region}.amazonaws.com" }, Action = ["kms:Encrypt", "kms:Decrypt", "kms:ReEncrypt*", "kms:GenerateDataKey*", "kms:DescribeKey"], Resource = "*",
+      Condition = { ArnEquals = { "kms:EncryptionContext:aws:logs:arn" = "${local.arn}:logs:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/eks/${var.name}/cluster" } }
+    }
+  ] })
 }
 resource "aws_iam_role" "cluster" {
   name = "${var.name}-cluster"
@@ -24,6 +32,7 @@ resource "aws_iam_role_policy_attachment" "cluster" {
 resource "aws_cloudwatch_log_group" "cluster" {
   name              = "/aws/eks/${var.name}/cluster"
   retention_in_days = 30
+  kms_key_id        = aws_kms_key.cluster.arn
 }
 resource "aws_eks_cluster" "this" {
   name     = var.name

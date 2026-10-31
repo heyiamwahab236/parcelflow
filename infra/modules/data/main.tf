@@ -38,31 +38,33 @@ resource "aws_db_parameter_group" "this" {
   }
 }
 resource "aws_db_instance" "this" {
-  identifier                      = var.name
-  engine                          = "postgres"
-  engine_version                  = "17"
-  instance_class                  = "db.t4g.micro"
-  allocated_storage               = 20
-  max_allocated_storage           = 100
-  storage_type                    = "gp3"
-  storage_encrypted               = true
-  kms_key_id                      = aws_kms_key.data.arn
-  db_name                         = "parcelflow"
-  username                        = "parcelflow_admin"
-  manage_master_user_password     = true
-  master_user_secret_kms_key_id   = aws_kms_key.data.arn
-  db_subnet_group_name            = aws_db_subnet_group.this.name
-  vpc_security_group_ids          = [aws_security_group.database.id]
-  parameter_group_name            = aws_db_parameter_group.this.name
-  publicly_accessible             = false
-  multi_az                        = var.multi_az
-  backup_retention_period         = 7
-  copy_tags_to_snapshot           = true
-  deletion_protection             = true
-  skip_final_snapshot             = false
-  final_snapshot_identifier       = "${var.name}-final"
-  auto_minor_version_upgrade      = true
-  enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
+  #checkov:skip=CKV_AWS_157:Dev explicitly defaults to Single-AZ to reduce cost. Enable multi_az_database and validate failover before requiring HA.
+  identifier                          = var.name
+  engine                              = "postgres"
+  engine_version                      = "17"
+  instance_class                      = "db.t4g.micro"
+  allocated_storage                   = 20
+  max_allocated_storage               = 100
+  storage_type                        = "gp3"
+  storage_encrypted                   = true
+  kms_key_id                          = aws_kms_key.data.arn
+  db_name                             = "parcelflow"
+  username                            = "parcelflow_admin"
+  manage_master_user_password         = true
+  iam_database_authentication_enabled = true
+  master_user_secret_kms_key_id       = aws_kms_key.data.arn
+  db_subnet_group_name                = aws_db_subnet_group.this.name
+  vpc_security_group_ids              = [aws_security_group.database.id]
+  parameter_group_name                = aws_db_parameter_group.this.name
+  publicly_accessible                 = false
+  multi_az                            = var.multi_az
+  backup_retention_period             = 7
+  copy_tags_to_snapshot               = true
+  deletion_protection                 = true
+  skip_final_snapshot                 = false
+  final_snapshot_identifier           = "${var.name}-final"
+  auto_minor_version_upgrade          = true
+  enabled_cloudwatch_logs_exports     = ["postgresql", "upgrade"]
 }
 resource "aws_secretsmanager_secret" "app" {
   name                    = "${var.name}/database"

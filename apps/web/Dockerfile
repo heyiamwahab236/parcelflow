@@ -8,6 +8,8 @@ COPY apps/web apps/web
 RUN npm run build --workspace @parcelflow/web
 
 FROM nginxinc/nginx-unprivileged:stable-alpine
+USER root
+RUN apk upgrade --no-cache
 COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/apps/web/dist /usr/share/nginx/html
 USER 101

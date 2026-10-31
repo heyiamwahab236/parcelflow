@@ -23,13 +23,21 @@ module "database" {
   node_security_group_id = module.cluster.node_security_group_id
   multi_az               = var.multi_az_database
 }
+resource "aws_kms_key" "images" {
+  description             = "${var.name} container registry encryption"
+  enable_key_rotation     = true
+  deletion_window_in_days = 30
+}
 resource "aws_ecr_repository" "app" {
   for_each             = toset(["api", "web"])
   name                 = "${var.name}/${each.key}"
   image_tag_mutability = "IMMUTABLE"
   force_delete         = false
   image_scanning_configuration { scan_on_push = true }
-  encryption_configuration { encryption_type = "AES256" }
+  encryption_configuration {
+    encryption_type = "KMS"
+    kms_key         = aws_kms_key.images.arn
+  }
 }
 resource "aws_ecr_lifecycle_policy" "app" {
   for_each   = aws_ecr_repository.app

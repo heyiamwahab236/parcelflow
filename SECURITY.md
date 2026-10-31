@@ -20,6 +20,8 @@ Use synthetic data in this demonstration environment. Please use GitHub's privat
 
 The intentionally public local demo password/token are scoped to a loopback-bound Compose stack. AWS bootstrap creates fresh random values. Never expose the local Compose stack to the internet or reuse those credentials elsewhere.
 
+The Checkov Multi-AZ rule has one explicit resource-level exception for the development database. Its default Single-AZ setting is a documented availability/cost trade-off, not a production recommendation. ECR and CloudWatch logs use customer-managed KMS keys.
+
 ## Before a real deployment
 
 Replace the shared operator token with individual authentication/authorization; add attribution to audit events; enforce and test workload network isolation; configure global rate controls, alert delivery, backup restore drills and credential rotation. Review third-party images and licenses and confirm cloud resource permissions and costs.

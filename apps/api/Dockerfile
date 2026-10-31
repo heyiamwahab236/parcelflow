@@ -9,7 +9,9 @@ FROM node:24-bookworm-slim
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl \
     && mkdir -p /app/certs \
     && curl --fail --silent --show-error https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem -o /app/certs/rds.pem \
-    && apt-get purge -y curl && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
+    && apt-get purge -y curl && apt-get autoremove -y && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /usr/local/lib/node_modules /opt/yarn-* \
+    && rm -f /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack /usr/local/bin/yarn /usr/local/bin/yarnpkg
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=dependencies /app/node_modules ./node_modules

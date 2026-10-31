@@ -2,7 +2,7 @@
 
 **A working parcel-tracking application with an AWS EKS deployment platform.**
 
-[![CI](https://github.com/heyiamwahab236/parcelflow/actions/workflows/ci.yml/badge.svg)](https://github.com/heyiamwahab236/parcelflow/actions/workflows/ci.yml)
+[CI workflow](https://github.com/heyiamwahab236/parcelflow/actions/workflows/ci.yml) · [Validation record](docs/validation.md)
 ![Node.js 24](https://img.shields.io/badge/Node.js-24-43853d)
 ![React](https://img.shields.io/badge/React-19-149eca)
 ![AWS EKS](https://img.shields.io/badge/AWS-EKS-ff9900)

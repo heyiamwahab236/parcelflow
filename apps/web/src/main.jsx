@@ -235,8 +235,7 @@ function App() {
                 <div className="search-copy">
                   <span className="section-kicker">LET’S FIND YOUR PARCEL</span>
                   <h2 id="track-title">
-                    One number.
-                    <br />
+                    One number. <br />
                     The whole journey.
                   </h2>
                   <p>Enter your tracking number to see the latest scan and delivery history.</p>
