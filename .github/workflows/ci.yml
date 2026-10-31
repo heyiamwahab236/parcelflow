@@ -41,7 +41,7 @@ jobs:
         with: { persist-credentials: false }
       - uses: hashicorp/setup-terraform@b9cd54a3c349d3f38e8881555d616ced269862dd # v3
         with: { terraform_version: '1.17.1' }
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with: { python-version: '3.12' }
       - run: pip install checkov==3.4.0 PyYAML==6.0.3
       - run: terraform fmt -check -recursive infra
