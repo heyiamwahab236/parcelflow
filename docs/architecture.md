@@ -1,5 +1,9 @@
 # Architecture and decisions
 
+![AWS deployment architecture](architecture.png)
+
+The diagram maps to the Terraform modules and Kubernetes resources in this repository. It describes the target deployment configuration; live AWS verification remains pending.
+
 ## Application boundary
 
 ParcelFlow is a synthetic parcel-tracking service. It does not call carrier APIs, estimate arrival times, accept payments or store recipient names/street addresses. A random 64-bit tracking identifier permits public lookup of city-level scan history. Treat it as a bearer reference; it is not authentication for sensitive delivery information.

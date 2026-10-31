@@ -1,6 +1,6 @@
 # ParcelFlow
 
-**A working parcel-tracking application with an AWS EKS deployment platform.**
+**A parcel-tracking platform built for deployment on AWS EKS.**
 
 [CI workflow](https://github.com/heyiamwahab236/parcelflow/actions/workflows/ci.yml) · [Validation record](docs/validation.md)
 ![Node.js 24](https://img.shields.io/badge/Node.js-24-43853d)
@@ -12,9 +12,15 @@ ParcelFlow follows a shipment from label creation to delivery. Customers can loo
 
 The infrastructure demonstrates the engineering around that application: private EKS nodes, an HTTPS Application Load Balancer, RDS, separate workload identities, Secrets Manager, container security checks, controlled database migrations, rolling deployments and CloudWatch monitoring.
 
-> **Project status:** The application is implemented and tested locally using Docker and real PostgreSQL. Terraform is validated and tested with a mocked AWS provider. The AWS deployment path is implemented but has **not been deployed or verified in an AWS account**. The demo uses synthetic data and has no live carrier integration. See [validation evidence](docs/validation.md).
+> **Deployment readiness:** Application and local checks verified; Terraform validated with mock plans. Live AWS verification is pending. [View verification details](docs/validation.md).
 
 ![ParcelFlow tracking screen using synthetic local data](docs/preview.jpg)
+
+## AWS architecture
+
+![ParcelFlow AWS architecture: private EKS, isolated RDS, workload identity and controlled delivery](docs/architecture.png)
+
+[Download SVG diagram](docs/architecture.svg) · [Explore architecture decisions](docs/architecture.md) · [Deploy to AWS](docs/aws-deployment.md) · [Review the security model](SECURITY.md)
 
 ## Run locally
 
@@ -59,32 +65,6 @@ docker compose down           # remove containers; keep the data volume
 - Kubernetes readiness/liveness probes, rolling updates, disruption budgets, HPA, HTTPS ingress and digest-pinned deployment rendering.
 - CI application/database tests, container smoke test, npm audit, Trivy image/secret scans, a documented Checkov baseline and Terraform mock-plan tests.
 - An **opt-in** GitHub Actions deployment workflow that scans and publishes release images, runs migrations and checks rollout. It requires AWS/environment/runner setup first.
-
-## Architecture
-
-```mermaid
-flowchart LR
-  customer[Customer / operator] -->|HTTPS| alb[Application Load Balancer]
-  subgraph vpc[AWS VPC — two availability zones]
-    alb -->|/| web[React / Nginx pods]
-    alb -->|/api| api[Node.js API pods]
-    subgraph eks[EKS — private worker nodes]
-      web
-      api
-      migration[Migration job]
-    end
-    api -->|Verified TLS, restricted role| db[(RDS PostgreSQL\nisolated subnets)]
-    migration -->|Schema changes| db
-    api -. Pod Identity .-> secrets[Secrets Manager]
-    migration -. Separate identity .-> secrets
-    eks --> cw[CloudWatch logs and metrics]
-  end
-  git[GitHub Actions] -->|Tests + scans| ecr[ECR images]
-  ecr -->|Immutable digest| eks
-  tf[Terraform] -. provisions .-> vpc
-```
-
-The diagram describes the implemented **target AWS configuration**, not a running cloud deployment. [Architecture decisions and limitations →](docs/architecture.md)
 
 ## Test it
 
@@ -147,4 +127,4 @@ docs/                      Architecture, API, deployment and operations
 - [Verification and remaining gaps](docs/validation.md)
 - [Contributing](CONTRIBUTING.md)
 
-Built with AI-assisted development; the repository includes executable checks and explicitly records what was and was not validated. Original code is MIT licensed; the upstream load balancer policy is Apache-2.0 licensed as recorded in [NOTICE](NOTICE).
+Original code is MIT licensed; the upstream load balancer policy is Apache-2.0 licensed as recorded in [NOTICE](NOTICE).

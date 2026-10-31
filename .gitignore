@@ -16,3 +16,11 @@ test-results/
 playwright-report/
 .DS_Store
 rendered.yaml
+.aws/
+.kube/
+*.pem
+*.key
+*.p12
+*.pfx
+*.tfplan.*
+*.backup
